@@ -59,6 +59,7 @@ public:
     //rt: real_time
     int64_t rt_byte_req = 0, rt_byte_miss = 0, rt_obj_req = 0, rt_obj_miss = 0;
     //global statistics
+	int64_t bytes_written = 0;
     std::vector<int64_t> seg_byte_req, seg_byte_miss, seg_object_req, seg_object_miss;
     std::vector<int64_t> seg_rss;
     std::vector<int64_t> seg_byte_in_cache;

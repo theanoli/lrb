@@ -122,6 +122,7 @@ void FrameWork::update_real_time_stats() {
 void FrameWork::update_stats() {
     auto _t_now = chrono::system_clock::now();
     cerr << "\nseq: " << seq << endl
+		 << "bytes written: " << bytes_written << endl
          << "cache size: " << webcache->_currentSize << "/" << webcache->_cacheSize
          << " (" << ((double) webcache->_currentSize) / webcache->_cacheSize << ")" << endl
          << "delta t: " << chrono::duration_cast<std::chrono::milliseconds>(_t_now - t_now).count() / 1000.
@@ -211,6 +212,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 update_metric_req(byte_miss, obj_miss, size);
                 update_metric_req(rt_byte_miss, rt_obj_miss, size)
                 webcache->admit(*req);
+				bytes_written += size; 
             }
         } else {
             update_metric_req(byte_miss, obj_miss, size);
@@ -237,6 +239,14 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
                              accumulate<vector<int64_t>::const_iterator, double>(seg_byte_req.begin(),
                                                                                  seg_byte_req.end(), 0)
     ));
+    value_builder.append(kvp("no_warmup_object_miss_ratio",
+                             accumulate<vector<int64_t>::const_iterator, double>(seg_object_miss.begin(),
+                                                                                 seg_object_miss.end(), 0) /
+                             accumulate<vector<int64_t>::const_iterator, double>(seg_object_req.begin(),
+                                                                                 seg_object_req.end(), 0)
+    ));
+    value_builder.append(kvp("bytes_written", bytes_written));
+	
 //    value_builder.append(kvp("byte_miss_cache", byte_miss_cache));
 //    value_builder.append(kvp("byte_miss_filter", byte_miss_filter));
     value_builder.append(kvp("segment_byte_miss", [this](sub_array child) {
@@ -264,6 +274,7 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
             child.append(element);
     }));
 
+	/*
     value_builder.append(kvp("real_time_segment_byte_miss", [this](sub_array child) {
         for (const auto &element : rt_seg_byte_miss)
             child.append(element);
@@ -284,6 +295,7 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
         for (const auto &element : rt_seg_rss)
             child.append(element);
     }));
+	*/
 
     webcache->update_stat(value_builder);
     return value_builder;
