@@ -89,7 +89,7 @@ void LRUCache::admit(const SimpleRequest &req)
     _cacheMap[obj] = _cacheList.begin();
     _currentSize += size;
     _size_map[obj] = size;
-    LOG("a", _currentSize, obj.id, obj.size);
+    LOG("a", _currentSize, obj.id, obj.size);  // TODO broken
 }
 
 bool InfCache::lookup(const SimpleRequest &req)
@@ -486,6 +486,76 @@ double AdaptSizeCache::modelHitRate(double log2c) {
     }
     return (weighted_hitratio_sum);
 }
+
+/*
+ * S2LRU
+ * not optimal: actually segment 0 can hold more than 1/2 if total segments are not full
+ * (ripped directly from S4LRU)
+*/
+
+void S2LRUCache::setSize(const uint64_t &cs) {
+    Cache::setSize(cs);
+
+    uint64_t total = cs;
+	segments[1].setSize(cs / 2); 
+
+	total -= cs / 2; 
+	segments[0].setSize(total);
+
+	std::cerr << "segment " << 0 << " size : " << segments[0].getSize() << "\n";
+	std::cerr << "segment " << 1 << " size : " << segments[1].getSize() << "\n";
+}
+
+bool S2LRUCache::lookup(const SimpleRequest &req)
+{
+    for(int i = 0; i < 2; i++) {
+		// lookup will promote object within the segment 
+        if(segments[i].lookup(req)) {
+            // hit
+            if(i == 0) {
+                // move up
+                segments[i].evict(req.id);
+                segment_admit(i+1,req);
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+void S2LRUCache::admit(const SimpleRequest &req)
+{
+    segments[0].admit(req);
+}
+
+void S2LRUCache::segment_admit(uint8_t idx, const SimpleRequest& req)
+{
+    if(idx == 0) {
+        segments[idx].admit(req);
+    } else {
+        segments[idx].admit(req);
+        while(segments[idx].getCurrentSize()
+              > segments[idx].getSize()) {
+            // need to evict from this partition first
+            // find least popular item in this segment
+            auto nreq = segments[idx].evict_return();
+            segment_admit(idx-1,nreq);
+        }
+    }
+}
+
+void S2LRUCache::evict(SimpleRequest& req)
+{
+    for(int i = 0; i < 2; i++) {
+        segments[i].evict(req.id);
+    }
+}
+
+void S2LRUCache::evict()
+{
+    segments[0].evict();
+}
+
 
 /*
   S4LRU

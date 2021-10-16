@@ -247,6 +247,43 @@ static Factory<AdaptSizeCache> factoryAdaptSize("AdaptSize");
 
 
 /*
+  S2LRU (taken from S4LRU with some mod)
+  enter at segment 0
+  if hit on segment i, segment i+1
+  if evicted on segment i, segment i-1
+*/
+class S2LRUCache : public Cache
+{
+protected:
+    LRUCache segments[2];
+
+public:
+    S2LRUCache()
+            : Cache() {
+        segments[0] = LRUCache();
+        segments[1] = LRUCache();
+    }
+
+    virtual ~S2LRUCache() {
+    }
+
+    void setSize(const uint64_t &cs) override;
+
+    bool lookup(const SimpleRequest &req) override;
+
+    void admit(const SimpleRequest &req) override;
+
+    void segment_admit(uint8_t idx, const SimpleRequest &req);
+
+    void evict(SimpleRequest &req);
+
+    void evict();
+};
+
+static Factory<S2LRUCache> factoryS2LRU("S2LRU");
+
+
+/*
   S4LRU
   enter at segment 0
   if hit on segment i, segment i+1

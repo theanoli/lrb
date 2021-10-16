@@ -16,12 +16,14 @@ for field in data:
             missratio_type = field.split('_')[-3]
             parsed[f"{missratio_type}wise hit ratio"] = 1 - float(data[field])
 
-parsed["containers_on_flash"] = 0
 parsed["devtype"] = "DRAM"
 parsed["write amplification"] = 1
-parsed["flash bytes written"] = parsed["bytes_written"]
+parsed["flash bytes written"] = int(parsed["bytes_written"])
 parsed["algo"] = parsed["cache_type"]
-parsed["lcache_capacity"] = parsed["cache_size"]
+
+# this is in GiB
+parsed["lcache_capacity"] = int(parsed["cache_size"])/pow(1024, 3)
+parsed["containers_on_flash"] = parsed["lcache_capacity"]
 
 results_dir = parsed['simulation_timestamp'].replace(" ", "_")
 os.mkdir(results_dir)

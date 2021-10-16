@@ -1,7 +1,7 @@
-#!/usr/bin/env nix-shell
-#!nix-shell -p cmake pkg-config boost procps
-#!nix-shell -i bash
+#!/bin/bash
+export CMAKE_PREFIX_PATH=$1
 set -e
+echo "path: $CMAKE_PREFIX_PATH"
 
 # # assume current path is under webcachesim
 # sudo apt-get update
@@ -45,5 +45,5 @@ cd ..
 cd ./build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
 make
-sudo ldconfig
+# sudo ldconfig
 cd ../
