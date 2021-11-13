@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <unordered_map>
 #include <cassert>
 #include "gd_variants.h"
@@ -184,6 +185,33 @@ long double GDSFCache::ageValue(const SimpleRequest& req)
     assert(_sizemap.find(obj) != _sizemap.end());
     return _currentL + static_cast<double>(_reqsMap[obj]) / static_cast<double>(size);
 }
+
+
+/*
+ * Capped-frequency GDSF
+ */
+bool GDSFnCache::lookup(const SimpleRequest& req)
+{
+    bool hit = GreedyDualBase::lookup(req);
+    auto & obj = req.id;
+    if (!hit) {
+        _reqsMap[obj] = 1; //reset bec. reqs_map not updated when element removed
+    } else {
+		uint64_t f = _reqsMap[obj]; 
+        _reqsMap[obj] = std::max(f, static_cast<uint64_t>(_n));
+    }
+    return hit;
+}
+
+long double GDSFnCache::ageValue(const SimpleRequest& req)
+{
+    auto & obj = req.id;
+    uint64_t & size = _sizemap[obj];
+    assert(_sizemap.find(obj) != _sizemap.end());
+    return _currentL + static_cast<double>(_reqsMap[obj]) / static_cast<double>(size);
+}
+
+
 
 /*
   LRU-K policy

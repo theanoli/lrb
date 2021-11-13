@@ -115,6 +115,44 @@ public:
 static Factory<GDSFCache> factoryGDSF("GDSF");
 
 /*
+ * GDSF + max frequency cap
+ */
+class GDSFnCache : public GreedyDualBase 
+{
+protected:
+    CacheStatsMapType _reqsMap;
+
+    virtual long double ageValue(const SimpleRequest& req);
+
+	uint8_t _n;  // frequency cap (i.e., on _reqsMap values)
+
+public:
+    GDSFnCache()
+		: GreedyDualBase(), 
+		  _n(1) {}
+
+	void init_with_params(const map<string, string> &params) override {
+        //set params
+        for (auto& it: params) {
+            if (it.first == "n") {
+				cerr << "Setting max frequency to 3" << endl;
+                _n = stoul(it.second);
+            } else {
+                cerr << "skipping parameter: " << it.first << endl;
+            }
+        }
+	}
+
+    virtual ~GDSFnCache()
+    {
+    }
+
+    bool lookup(const SimpleRequest &req);
+};
+
+static Factory<GDSFnCache> factoryGDSFn("GDSFn");
+
+/*
   LRU-K policy
 */
 typedef std::unordered_map<uint64_t , std::queue<uint64_t>> lrukMapType;
