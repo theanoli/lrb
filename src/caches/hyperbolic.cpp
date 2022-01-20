@@ -3,6 +3,8 @@
 //
 
 #include "hyperbolic.h"
+#include <stdint.h>
+
 
 bool HyperbolicCache::lookup(const SimpleRequest &req) {
     auto it = key_map.find(req.id);
@@ -69,6 +71,7 @@ pair<uint64_t, uint32_t> HyperbolicCache::rank(const uint64_t & t) {
 
     for (uint32_t i = 0; i < n_sample; i++) {
         uint32_t pos = (i+rand_idx)%meta_holder.size();
+		
         auto & meta = meta_holder[pos];
 
         double score = meta._n_requests / (t - meta._insertion_time+1);  //add 1 to dividend to prevent 0

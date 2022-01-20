@@ -40,7 +40,8 @@ public:
 
     unsigned long sample_rate = 64;
 
-    default_random_engine _generator = default_random_engine();
+	random_device rd;
+    default_random_engine _generator = default_random_engine(rd());
     uniform_int_distribution<std::size_t> _distribution = uniform_int_distribution<std::size_t>();
 
     void init_with_params(const map<string, string> &params) override {
@@ -48,6 +49,7 @@ public:
         for (auto& it: params) {
             if (it.first == "sample_rate") {
                 sample_rate = stoul(it.second);
+				cerr << "Sample rate set to " << sample_rate << endl;
             } else {
                 cerr << "unrecognized parameter: " << it.first << endl;
             }
