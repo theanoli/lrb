@@ -9,8 +9,7 @@ nodes:
   - localhost
 
 trace_files:
-  - wiki2018.tr
+  - ntg1_500m_base.tr.reindex
 
 cache_types:
   - LRB
-

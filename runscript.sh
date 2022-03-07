@@ -1,6 +1,7 @@
+echo $PATH
 # docker run -it -v ${YOUR TRACE DIRECTORY}:/trace sunnyszy/webcachesim ${traceFile} ${cacheType} ${cacheSize} [--param=value]
 root="/home/theano/webcachesim"
-export PATH="$root/build/bin"
+export PATH=$PATH:"$root/build/bin"
 export WEBCACHESIM_TRACE_DIR="/home/theano/traces"
 export WEBCACHESIM_ROOT=$root
 
@@ -34,7 +35,7 @@ elif [ $trace = "ntg1_capped" ]; then
 else
 	cacheSize=$((1024 * 1024 * 1024 * 142))
 	n_early_stop=$(( 5000 * 1000 * 1000 ))
-	traceFile="ntg1_500m_base.tr.reindex.annot.threecol"
+	traceFile="ntg1_500m_base.tr.reindex"
 	results_dir="/home/theano/results/webcachesim_results/ntg1_results"
 fi
 
@@ -48,15 +49,21 @@ for size in 256; do
 	# 	webcachesim_cli $traceFile $cacheType $cacheSize --n=3 --n_early_stop=$n_early_stop --enable_trace_format_check=0 > "$results_dir"/"$cacheType"_"$cacheSize".log
 	# done
 
-	cacheType=Hyperbolic
-	for r in 64 128 512; do  # "GDSF" "Belady" "S2LRU" "Inf"; do 
-		echo "\tCache type $cacheType..."
-		webcachesim_cli $traceFile $cacheType $cacheSize --sample_rate=$r --n_early_stop=$n_early_stop --enable_trace_format_check=0 > "$results_dir"/Hyperbolic_"$cacheSize"_"$r".log
+	# for cacheType in "LRB"; do #"GDSF" "Belady" "S2LRU" "Inf"; do 
+	# 	echo "\tCache type $cacheType..."
+	# 	webcachesim_cli $traceFile $cacheType $cacheSize --n_early_stop=$n_early_stop --objective=byte_miss_ratio --enable_trace_format_check=0 > "$results_dir"/"$cacheType"_"$cacheSize".log
+
+	# done
+
+	for memwindow_m in 2; do #64 128 256; do 
+		cacheType="LRB"
+		echo "\tCache type $cacheType, window $memwindow_m..."
+		webcachesim_cli $traceFile $cacheType $cacheSize --n_early_stop=$n_early_stop \
+			--objective=object_miss_ratio \
+			--memory_window=$((1024 * 1024 * $memwindow_m)) \
+			--enable_trace_format_check=0 > \
+			"$results_dir"/"$cacheType"_"$cacheSize"_$(date +%s).log
+
 	done
 
-	#for cacheType in "GDSF" "Belady" "S2LRU" "Inf"; do 
-	#	echo "\tCache type $cacheType..."
-	#	webcachesim_cli $traceFile $cacheType $cacheSize --n_early_stop=$n_early_stop --enable_trace_format_check=0 > "$results_dir"/"$cacheType"_"$cacheSize".log
-
-	#done
 done
