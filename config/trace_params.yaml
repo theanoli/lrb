@@ -8,4 +8,12 @@ wiki2018.tr:
   byte_million_req: 35234263115
   n_req: 2800000000
   n_early_stop:
+    - 1000000000
+
+ntg1_500m_base.tr.reindex:
+  cache_sizes:
+    - 289910292480
+  byte_million_req: 35234263115
+  n_req: 500000000
+  n_early_stop:
     - -1
