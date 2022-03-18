@@ -19,6 +19,8 @@ buildPythonPackage rec {
 		emukit
 	]; 
 
+	doCheck = false; 
+
 	emukit = pkgs.callPackage /home/theano/webcachesim/python-package/emukit.nix {
 		pkgs=pkgs; buildPythonPackage=pkgs.python38Packages.buildPythonPackage; }; 
 

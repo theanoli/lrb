@@ -1,11 +1,10 @@
 with import <nixpkgs> {}; 
 
 mkShell {
-	nativeBuildInputs = [ stdenv cmake glibc pkg-config ];
-	buildInputs = [ procps boost ];
+	#nativeBuildInputs = [ ];
+	buildInputs = [ gcc9 stdenv cmake pkg-config binutils procps boost169 openssl gsasl ];
 
 	# shellHook = ''
 	# 	sudo bash ./scripts/install.sh $CMAKE_PREFIX_PATH
 	# '';
 }
-

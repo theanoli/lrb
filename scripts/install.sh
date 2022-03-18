@@ -12,6 +12,8 @@ echo "path: $CMAKE_PREFIX_PATH"
 # sudo apt-get install -y openjdk-8-jdk
 # java -version  # output should be 1.8
 
+mkdir -p build
+
 cd ./lib
 # install LightGBM
 cd ./LightGBM/build
